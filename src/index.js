@@ -4,7 +4,7 @@ import upsert from "pouchdb-upsert";
 import firebase from "firebase/app";
 import "firebase/firestore";
 
-const parseAuthObj = (meAuth) => {
+const stringAuthObj = (meAuth) => {
   var {
     uid,
     displayName,
@@ -175,33 +175,33 @@ class PromptAuth extends React.Component {
           )
         )
         .catch(standardCatch);
-    if (Object.keys(meAuth).length === 0)
+    if (!meAuth || Object.keys(meAuth).length === 0)
       return this.props.setFireAuth({ meAuth: {} }, () =>
         store({ _id: "none" }, "store", logout)
       );
     verbose && console.log("REACT-LOCAL-FIREBASE: " + meAuth.uid + " found");
-    var stripped = parseAuthObj(meAuth);
+    var meAuthstripped = stringAuthObj(meAuth);
 
-    if (this.state.storedAuth !== stripped) {
+    if (this.state.storedAuth !== meAuthstripped) {
       //getUserData from update
       //new meAuth object
       this.props.setFireAuth({ meAuth });
       verbose &&
         console.log(
-          "REACT-LOCAL-FIREBASE: " + meAuth.uid + " being stored grant" //+ stripped.isAnonymous ? "" : "?"
+          "REACT-LOCAL-FIREBASE: " + meAuth.uid + " being stored grant" //+ meAuthstripped.isAnonymous ? "" : "?"
         );
-      if (stripped.isAnonymous) return store(stripped, "store");
+      if (meAuthstripped.isAnonymous) return store(meAuthstripped, "store");
 
       var stor = true;
       if (!hasPermission) {
         stor = window.confirm(
           "is this a private device? if so, can we store your auth data?" +
-            `(${stripped.displayName},${stripped.phoneNumber},${stripped.email})`
+            `(${meAuthstripped.displayName},${meAuthstripped.phoneNumber},${meAuthstripped.email})`
         );
       }
 
       if (stor) {
-        store(stripped, "store");
+        store(meAuthstripped, "store");
       }
     }
   };
@@ -282,28 +282,31 @@ class PromptAuth extends React.Component {
     const { verbose, auth } = this.props;
     const { storedAuth } = this.state;
     return (
-      <div>
+      <div style={this.props.style}>
         <div
           ref={this.props.pa}
-          style={this.props.style}
-          onClick={async () => {
+          onClick={() => {
             this.storeAuth(...this.props.storableAuth);
-            this.props.clearStore();
+            //this.props.clearStore();
           }}
         />
         <div
-          ref={this.props.fwd}
-          style={this.props.style}
+          ref={this.props.gui}
           onClick={async () => {
             this.props.onStart();
-            var res;
-            if (this.props.reset) {
-              res = await this.storeAuth({});
-              this.props.resetResetAuth();
-            } else {
-              res = await this.getUserInfo(verbose, auth, storedAuth);
-              if (res === "login?") this.props.onPromptToLogin();
-            }
+            var res = await this.getUserInfo(verbose, auth, storedAuth);
+            if (res === "login?") this.props.onPromptToLogin();
+
+            if (res) this.props.onFinish(); //res.isAnonymous
+          }}
+        />
+        <div
+          ref={this.props.ra}
+          onClick={async () => {
+            this.props.onStart();
+            var res = await this.storeAuth({});
+            this.props.resetResetAuth();
+
             if (res) this.props.onFinish(); //res.isAnonymous
           }}
         />
@@ -311,29 +314,13 @@ class PromptAuth extends React.Component {
     );
   }
 }
-export default React.forwardRef((props, getRefs) => {
-  const { pa, fwd } = props.getRefs();
-  return <PromptAuth fwd={fwd} pa={pa} {...props} />;
+export default React.forwardRef((props, ref) => {
+  return (
+    <PromptAuth
+      gui={ref.current["gui"]}
+      pa={ref.current["pa"]}
+      ra={ref.current["ra"]}
+      {...props}
+    />
+  );
 });
-/*export default React.forwardRef((props, ref) => {
-  return <PromptAuth fwd={ref.fwd} pa={ref.pa} {...props} />;
-});*/
-
-/**
- * 
-        {React.forwardRef((props, ref) =>
-          React.createElement(
-            <div
-              ref={ref}
-              style={this.props.style}
-              onClick={async () => {
-                this.props.onStart();
-                const res = await this.getUserInfo(verbose, auth, storedAuth);
-                if (res === "login?") this.props.onPromptToLogin();
-                if (res) this.props.onFinish(); //res.isAnonymous
-              }}
-            />,
-            props
-          )
-        )}
- */
