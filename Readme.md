@@ -102,7 +102,7 @@ render() {
         auth={this.state.auth === undefined ? null : this.state.auth}
       />
 
-      <Data
+      <Customs
         meAuth={this.state.meAuth}
         getUserInfo={this.gui.current.click}//this.getUserInfo()}
         saveAuth={(x, hasPermission) => 
