@@ -23,29 +23,24 @@ class Auth extends React.Component {
     //this.Vintages = React.createRef();
   }
 render() {
-  const logoutofapp = async () => {
-          var answer = window.confirm("Are you sure you want to log out?");
-          if (answer) {
-            await firebase
-              .auth()
-              .setPersistence(firebase.auth.Auth.Persistence.SESSION);
-            firebase
-              .auth()
-              .signOut()
-              .then(() => {
-                console.log("logged out");
-                this.pa.current.click({}, true);
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          } else {
-            this.setState({ resetAuth: true }, () =>
-              this.gui.current.click()
-            );
-            // this.getUserInfo();
-          }
-        }
+    const logoutofapp = async () => {
+      var answer = window.confirm("Are you sure you want to log out?");
+      if (!answer) return this.ra.current.click();
+
+      await firebase
+        .auth()
+        .setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          console.log("logged out");
+          this.pa.current.click({}, true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    };
   return (
     <div>
       <PromptAuth
