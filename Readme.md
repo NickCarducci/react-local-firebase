@@ -11,12 +11,10 @@ how to use
 class Auth extends React.Component {
   constructor(props) {
     super(props);
-    var storedAuth = undefined;
     this.state = {
       auth: undefined,
       user: undefined,
       meAuth: {},
-      storedAuth,
       storableAuth: []
     };
     this.pa = React.createRef();
