@@ -19,6 +19,7 @@ class Auth extends React.Component {
     };
     this.pa = React.createRef();
     this.gui = React.createRef();
+    this.ra = React.createRef()
     //this.Vintages = React.createRef();
   }
 render() {
@@ -48,18 +49,20 @@ render() {
   return (
     <div>
       <PromptAuth
-        ref={{ current: { pa: this.pa, fwd: this.fwd } }}
+        ref={{ current: { pa: this.pa, fwd: this.fwd, ra: this.ra } }}
         /*old version
         getRefs={() => {
           return {
             pa: this.pa,
             gui: this.gui
           };
-        }}*/
+        }}
         reset={this.state.resetAuth}
+        resetResetAuth={() => this.setState({ resetAuth: null })}
+        */
+        
         storableAuth={this.state.storableAuth}
         clearAuth={() => this.setState({ storableAuth: [] })}
-        resetResetAuth={() => this.setState({ resetAuth: null })}
         onPromptToLogin={() => this.props.history.push("/login")}
         verbose={true}
         onStart={() => this.props.loadGreenBlue("loading authentication...")}
