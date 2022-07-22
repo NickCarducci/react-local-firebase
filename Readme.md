@@ -1,6 +1,6 @@
 # Local-Firebase, your auth-cacher for firebase (in React)!
 
-### 
+### https://codesandbox.io/s/react-local-firebase-i7l8qe
 
 LICENSE AGPL-3
 No redistribution but for strategy of parts, unless retributed
@@ -22,15 +22,40 @@ class Auth extends React.Component {
     //this.Vintages = React.createRef();
   }
 render() {
+  const logoutofapp = async () => {
+          var answer = window.confirm("Are you sure you want to log out?");
+          if (answer) {
+            await firebase
+              .auth()
+              .setPersistence(firebase.auth.Auth.Persistence.SESSION);
+            firebase
+              .auth()
+              .signOut()
+              .then(() => {
+                console.log("logged out");
+                this.pa.current.click({}, true);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          } else {
+            this.setState({ resetAuth: true }, () =>
+              this.gui.current.click()
+            );
+            // this.getUserInfo();
+          }
+        }
   return (
     <div>
       <PromptAuth
+        ref={{ current: { pa: this.pa, fwd: this.fwd } }}
+        /*old version
         getRefs={() => {
           return {
             pa: this.pa,
             gui: this.gui
           };
-        }}
+        }}*/
         reset={this.state.resetAuth}
         storableAuth={this.state.storableAuth}
         clearAuth={() => this.setState({ storableAuth: [] })}
@@ -81,39 +106,14 @@ render() {
 
       <Data
         meAuth={this.state.meAuth}
-        getUserInfo={
-          () => this.gui.current.click()
-          //this.getUserInfo()}
-        } //
-        saveAuth={(x, hasPermission) => {
+        getUserInfo={this.gui.current.click}//this.getUserInfo()}
+        saveAuth={(x, hasPermission) => 
           this.setState(
             { storableAuth: [x, true, hasPermission] },
-            () => this.pa.current.click()
-          );
-        }}
-        logoutofapp={async () => {
-          var answer = window.confirm("Are you sure you want to log out?");
-          if (answer) {
-            await firebase
-              .auth()
-              .setPersistence(firebase.auth.Auth.Persistence.SESSION);
-            firebase
-              .auth()
-              .signOut()
-              .then(() => {
-                console.log("logged out");
-                this.pa.current.click({}, true);
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          } else {
-            this.setState({ resetAuth: true }, () =>
-              this.gui.current.click()
-            );
-            // this.getUserInfo();
-          }
-        }}
+            this.pa.current.click//promtAuth
+          )
+        }
+        logoutofapp={logoutofapp}
 ````
 
 SEE LICENSE IN LICENSE.lz.txt
