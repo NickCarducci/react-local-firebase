@@ -19,7 +19,7 @@ class Auth extends React.Component {
     };
     this.pa = React.createRef();
     this.gui = React.createRef();
-    this.Vintages = React.createRef();
+    //this.Vintages = React.createRef();
   }
 render() {
   return (
@@ -35,8 +35,6 @@ render() {
         storableAuth={this.state.storableAuth}
         clearAuth={() => this.setState({ storableAuth: [] })}
         resetResetAuth={() => this.setState({ resetAuth: null })}
-        //pa={this.pa}
-        //gui={this.gui}
         onPromptToLogin={() => this.props.history.push("/login")}
         verbose={true}
         onStart={() => this.props.loadGreenBlue("loading authentication...")}
@@ -90,8 +88,7 @@ render() {
         saveAuth={(x, hasPermission) => {
           this.setState(
             { storableAuth: [x, true, hasPermission] },
-            () => {}
-            // setTimeout(() => this.pa.current.click(), 200)
+            () => this.pa.current.click()
           );
         }}
         logoutofapp={async () => {
