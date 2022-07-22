@@ -104,7 +104,7 @@ render() {
 
       <Customs
         meAuth={this.state.meAuth}
-        getUserInfo={this.gui.current.click}//this.getUserInfo()}
+        getUserInfo={()=>this.gui.current.click()}//this.getUserInfo()}
         saveAuth={(x, hasPermission) => 
           this.setState(
             { storableAuth: [x, true, hasPermission] },
