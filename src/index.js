@@ -305,7 +305,6 @@ class PromptAuth extends React.Component {
           onClick={async () => {
             this.props.onStart();
             var res = await this.storeAuth({});
-            this.props.resetResetAuth();
 
             if (res) this.props.onFinish(); //res.isAnonymous
           }}
