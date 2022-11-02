@@ -1,0 +1,56 @@
+{
+    "name": "react-local-firebase",
+    "version": "1.2.9",
+    "description": "ref.click() to signInAnonymously or cache auth objects from onAuthStateChanged",
+    "main": "lib/index.js",
+    "keywords": [
+        "onSnapshot",
+        "authentication",
+        "caching",
+        "anonymous",
+        "local-storage",
+        "firebase",
+        "pouchdb",
+        "react"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nickcarducci/react-local-firebase"
+    },
+    "files": [
+        "lib",
+        "src",
+        "index..js"
+    ],
+    "sideEffects": false,
+    "license": "UNLICENSED",
+    "author": "Nick Carducci nick@carducci.sh",
+    "bugs": {
+        "url": "https://github.com/nickcarducci/react-local-firebase"
+    },
+    "scripts": {
+        "build": "rollup -c -o lib/index.js"
+    },
+    "peerDependencies": {
+        "firebase": ">=8.7.0",
+        "pouchdb": ">=7.2.2",
+        "pouchdb-upsert": ">=2.2.0",
+        "react": ">=16.8.0"
+    },
+    "devDependencies": {
+        "@babel/core": "7.15.0",
+        "@babel/preset-env": "^7.14.8",
+        "@babel/preset-react": "^7.14.5",
+        "@rollup/plugin-babel": "5.3.0",
+        "@rollup/plugin-commonjs": "20.0.0",
+        "@rollup/plugin-node-resolve": "13.0.4",
+        "core-js": "^3.6.5",
+        "nodemon": "1.18.4",
+        "path": "^0.12.7",
+        "regenerator-runtime": "^0.13.7",
+        "rollup": "2.56.2",
+        "rollup-plugin-auto-external": "2.0.0",
+        "rollup-plugin-livereload": "^1.0.0",
+        "rollup-plugin-postcss": "^2.0.3"
+    }
+}

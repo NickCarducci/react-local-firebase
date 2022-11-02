@@ -1,0 +1,36 @@
+{
+    "name": "react-local-firebase",
+    "version": "2.0.2",
+    "description": "ref.click() to signInAnonymously or cache auth objects from onAuthStateChanged",
+    "main": "src/index.js",
+    "keywords": [
+        "onSnapshot",
+        "authentication",
+        "caching",
+        "anonymous",
+        "local-storage",
+        "firebase",
+        "pouchdb",
+        "react"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nickcarducci/react-local-firebase"
+    },
+    "files": [
+        "src",
+        "index.js"
+    ],
+    "sideEffects": false,
+    "license": "UNLICENSED",
+    "author": "Nick Carducci nick@carducci.sh",
+    "bugs": {
+        "url": "https://github.com/nickcarducci/react-local-firebase"
+    },
+    "peerDependencies": {
+        "firebase": ">=8.7.0",
+        "pouchdb": ">=7.2.2",
+        "pouchdb-upsert": ">=2.2.0",
+        "react": ">=16.8.0"
+    }
+}
