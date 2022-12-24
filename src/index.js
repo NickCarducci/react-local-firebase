@@ -18,23 +18,24 @@ const optsForPouchDB = {
 //if the economy settled would be property, what is the dollar vs bond
 //machine rent is how capital wedges labor
 class ADB {
-  constructor() {
+  constructor(verbose) {
     PouchDB.plugin(upsert);
     const title = "meAuth";
+    this.verbose = verbose;
     this.db = new PouchDB(title, optsForPouchDB);
   } //layoffs will make deflation, ill
   destroy = () =>
     this.db
       .destroy()
-      .then(function () {
-        console.log("destroy");
+      .then(() => {
+        this.verbose && console.log("destroy");
         PouchDB.plugin(upsert);
         const title = "meAuth";
         this.db = new PouchDB(title, optsForPouchDB);
       })
       .catch(standardCatch); //conservative margins: layoffs, uniformity, more
   store = async (bloc) => {
-    console.log("store", bloc);
+    this.verbose && console.log("store", bloc);
     const sbloc = JSON.stringify(bloc);
     if (!bloc._id)
       return window.alert("pouchdb needs ._id key:value: JSON.parse= " + sbloc); //has upsert plugin from class constructor
@@ -48,7 +49,6 @@ class ADB {
     }).catch(standardCatch); //return a copy, don't displace immutable object fields
   };
   remove = async (key) => {
-    console.log("remove");
     /*if (!key._id)
       window.alert(
         "pouchdb needs ._id key:value: JSON.parse= " + JSON.parse(key)
@@ -57,7 +57,7 @@ class ADB {
       .get(key)
       //.then(async (r) => await JSON.parse(r))
       .then(async (key) => {
-        console.log(key);
+        this.verbose && console.log("removed", key);
         return await this.db.remove(key).catch((e) => this.destroy());
       })
       .catch(standardCatch);
@@ -70,7 +70,7 @@ class ADB {
         const a = async (v) =>
           await new Promise((r) => {
             const pv = p(v);
-            console.log(pv);
+            this.verbose && console.log(pv);
             r(JSON.stringify(pv));
           });
         return await Promise.all(allNotes.rows.map(a));
@@ -82,7 +82,7 @@ class ADB {
 class PromptAuth extends React.Component {
   constructor(props) {
     super(props);
-    const adb = new ADB();
+    const adb = new ADB(props.verbose);
     this.state = {
       adb
     };
@@ -90,6 +90,8 @@ class PromptAuth extends React.Component {
   componentDidMount = () => {
     this.state.adb
       .readAuth()
+      //.then(async (r) => await JSON.parse(r[0]))
+      .then((r) => r[0])
       .then(async (r) => {
         //console.log(r);
         if (r.constructor === Array) return r;
@@ -117,12 +119,12 @@ class PromptAuth extends React.Component {
         this.props.verbose &&
           console.log(
             `REACT-LOCAL-FIREBASE(pouchdb): ${
-              !read
-                ? "no user stored..."
-                : read.user.isAnonymous
+            !read
+              ? "no user stored..."
+              : read.user.isAnonymous
                 ? "authdb is anonymous"
                 : //: read._id !== "none"?
-                  "is identifiable"
+                "is identifiable"
             }` + (read ? `: ` : ""),
             read.user
           ); // + Object.keys(read.user).filter((x) => read[x])
@@ -159,8 +161,8 @@ class PromptAuth extends React.Component {
         if (!info.isAnonymous && !force)
           save = window.confirm(
             (!this.props.meAuth ? "is this a private device? if so, " : "") +
-              "can we store your auth data?" +
-              `(${info.displayName},${info.phoneNumber},${info.email})` //mea
+            "can we store your auth data?" +
+            `(${info.displayName},${info.phoneNumber},${info.email})` //mea
           );
         if (save) {
           verbose &&
@@ -175,11 +177,11 @@ class PromptAuth extends React.Component {
           const { displayName, phoneNumber, email } = meAuth;
           window.confirm(
             "should we clear the following from your device? " +
-              `(${displayName},${phoneNumber},${email})` //mea
+            `(${displayName},${phoneNumber},${email})` //mea
           ) &&
             this.state.adb["store"]({ _id: this.props.meAuth.uid })
               .then(async (r) => await JSON.parse(r))
-              .then((res) => {}) //reload,"isStored"
+              .then((res) => { }) //reload,"isStored"
               .catch(standardCatch); //when anonymous, too
           setFireAuth(info); //var meAuthstripped = stringAuthObj(mea);console.log(meAuthstripped);
           verbose &&
@@ -245,7 +247,7 @@ class PromptAuth extends React.Component {
             verbose &&
               console.log(
                 `REACT-LOCAL-FIREBASE: ${
-                  meAuth.uid + " is stored, saving on costs here"
+                meAuth.uid + " is stored, saving on costs here"
                 }`
               ); //!meAuth.multiFactor ? meAuth.uid + " is substandard; !meAuth1.multiFactor, deleting these from pouchdb.."
             removeanon(); //: //strAu.uid + ": JSON.parse-ing 'meAuth1.multiFactor' object..":

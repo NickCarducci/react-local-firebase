@@ -1,6 +1,6 @@
 {
     "name": "react-local-firebase",
-    "version": "2.0.2",
+    "version": "2.0.4",
     "description": "ref.click() to signInAnonymously or cache auth objects from onAuthStateChanged",
     "main": "src/index.js",
     "keywords": [
