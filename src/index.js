@@ -53,11 +53,13 @@ class ADB {
       window.alert(
         "pouchdb needs ._id key:value: JSON.parse= " + JSON.parse(key)
       ) && this.destroy();*/
+    this.verbose && console.log("removing auth", key);
     return await this.db
       .get(key)
       //.then(async (r) => await JSON.parse(r))
       .then(async (key) => {
-        this.verbose && console.log("removed", key);
+        //this.verbose &&
+        console.log("removed", key);
         return await this.db.remove(key).catch((e) => this.destroy());
       })
       .catch(standardCatch);
@@ -70,7 +72,7 @@ class ADB {
         const a = async (v) =>
           await new Promise((r) => {
             const pv = p(v);
-            this.verbose && console.log(pv);
+            this.verbose && console.log(pv); //need aquarian
             r(JSON.stringify(pv));
           });
         return await Promise.all(allNotes.rows.map(a));
@@ -113,18 +115,18 @@ class PromptAuth extends React.Component {
 
         //const read = r ? k.proactiveRefresh.user : {};
 
-        this.props.setFireAuth((window[this.props.windowKey] = read.user));
+        this.props.setFireAuth((window[this.props.windowKey] = read.user)); //bottle
         //console.log(window[this.props.windowKey]);
         //storedAuth.multiFactor = JSON.parse(storedAuth.multiFactor);
         this.props.verbose &&
           console.log(
             `REACT-LOCAL-FIREBASE(pouchdb): ${
-            !read
-              ? "no user stored..."
-              : read.user.isAnonymous
+              !read
+                ? "no user stored..."
+                : read.user.isAnonymous
                 ? "authdb is anonymous"
                 : //: read._id !== "none"?
-                "is identifiable"
+                  "is identifiable"
             }` + (read ? `: ` : ""),
             read.user
           ); // + Object.keys(read.user).filter((x) => read[x])
@@ -161,8 +163,8 @@ class PromptAuth extends React.Component {
         if (!info.isAnonymous && !force)
           save = window.confirm(
             (!this.props.meAuth ? "is this a private device? if so, " : "") +
-            "can we store your auth data?" +
-            `(${info.displayName},${info.phoneNumber},${info.email})` //mea
+              "can we store your auth data?" +
+              `(${info.displayName},${info.phoneNumber},${info.email})` //mea
           );
         if (save) {
           verbose &&
@@ -174,15 +176,17 @@ class PromptAuth extends React.Component {
             .then((res) => setFireAuth(res)) //reload,"isStored"
             .catch(standardCatch); //when anonymous, too
         } else {
-          const { displayName, phoneNumber, email } = meAuth;
-          window.confirm(
-            "should we clear the following from your device? " +
-            `(${displayName},${phoneNumber},${email})` //mea
-          ) &&
-            this.state.adb["store"]({ _id: this.props.meAuth.uid })
-              .then(async (r) => await JSON.parse(r))
-              .then((res) => { }) //reload,"isStored"
-              .catch(standardCatch); //when anonymous, too
+          if (meAuth) {
+            const { displayName, phoneNumber, email } = meAuth;
+            window.confirm(
+              "should we clear the following from your device? " +
+                `(${displayName},${phoneNumber},${email})` //mea
+            ) &&
+              this.state.adb["store"]({ _id: meAuth.uid })
+                .then(async (r) => await JSON.parse(r))
+                .then((res) => {}) //reload,"isStored"
+                .catch(standardCatch); //when anonymous, too
+          }
           setFireAuth(info); //var meAuthstripped = stringAuthObj(mea);console.log(meAuthstripped);
           verbose &&
             console.log("REACT-LOCAL-FIREBASE(ephemeral): " + info.uid); //+ meAuthstripped.isAnonymous ? "" : "?"
@@ -247,7 +251,7 @@ class PromptAuth extends React.Component {
             verbose &&
               console.log(
                 `REACT-LOCAL-FIREBASE: ${
-                meAuth.uid + " is stored, saving on costs here"
+                  meAuth.uid + " is stored, saving on costs here"
                 }`
               ); //!meAuth.multiFactor ? meAuth.uid + " is substandard; !meAuth1.multiFactor, deleting these from pouchdb.."
             removeanon(); //: //strAu.uid + ": JSON.parse-ing 'meAuth1.multiFactor' object..":
@@ -257,7 +261,11 @@ class PromptAuth extends React.Component {
           ref={this.props.ra} //resetAuth
           onClick={() => {
             //this.props.onStart();
-            if (!meAuth.uid) return; //hoistAuth({}, true, true); //payload, reload, all-but-denied permission
+            if (!meAuth.uid)
+              return console.log(
+                "(react-local-firebase): no loaded meAuth",
+                meAuth
+              ); //hoistAuth({}, true, true); //payload, reload, all-but-denied permission
             this.state.adb["remove"](meAuth.uid) //_id
               .then((res) => setFireAuth({})) //, true, "isStored"))
               .catch(standardCatch); //when anonymous, too  //if (res) this.props.onFinish(); //res.isAnonymous
