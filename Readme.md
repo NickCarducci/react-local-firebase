@@ -22,7 +22,10 @@ class Auth extends React.Component {
 render() {
     const logoutofapp = () => {
       var answer = window.confirm("Are you sure you want to log out?");
-      if (!answer) return null;
+      if (!answer) {
+        this.ra.current.click();
+        return this.gui.current.click();
+      } //ra;//null;
       signOut(getAuth())
         .then(async () => {
           console.log("logged out");

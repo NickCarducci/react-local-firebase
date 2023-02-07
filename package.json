@@ -1,6 +1,6 @@
 {
-    "name": "react-local-firebase",
-    "version": "2.0.5",
+    "name": "react-local-firebase-2",
+    "version": "2.0.6",
     "description": "ref.click() to signInAnonymously or cache auth objects from onAuthStateChanged",
     "main": "src/index.js",
     "keywords": [
@@ -23,7 +23,7 @@
     ],
     "sideEffects": false,
     "license": "UNLICENSED",
-    "author": "Nick Carducci nick@carducci.sh",
+    "author": "Nick Carducci nmcarducci@gmail.com",
     "bugs": {
         "url": "https://github.com/nickcarducci/react-local-firebase"
     },
