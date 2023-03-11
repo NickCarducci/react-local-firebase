@@ -23,7 +23,7 @@ render() {
     const logoutofapp = () => {
       var answer = window.confirm("Are you sure you want to log out?");
       if (!answer) {
-        this.ra.current.click();
+        //this.ra.current.click();
         return this.gui.current.click();
       } //ra;//null;
       signOut(getAuth())
@@ -83,10 +83,9 @@ render() {
             }
           }}
           onFinish={() => {}}
-          meAuth={this.state.auth === undefined ? null : this.state.auth}
         />
         <Sudo
-          meAuth={this.state.auth}
+          meAuth={this.state.auth === undefined ? null : this.state.auth}
           getUserInfo={() => this.gui.current.click()}
           logoutofapp={logoutofapp} //rendered function 
           setAuth={(auth) =>

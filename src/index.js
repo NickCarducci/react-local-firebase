@@ -20,7 +20,7 @@ const optsForPouchDB = {
 class ADB {
   constructor(verbose) {
     PouchDB.plugin(upsert);
-    const title = "meAuth";
+    const title = "windowAuth";
     this.verbose = verbose;
     this.db = new PouchDB(title, optsForPouchDB);
   } //layoffs will make deflation, ill
@@ -30,7 +30,7 @@ class ADB {
       .then(() => {
         this.verbose && console.log("destroy");
         PouchDB.plugin(upsert);
-        const title = "meAuth";
+        const title = "windowAuth";
         this.db = new PouchDB(title, optsForPouchDB);
       })
       .catch(standardCatch); //conservative margins: layoffs, uniformity, more
@@ -117,7 +117,7 @@ class PromptAuth extends React.Component {
         //const read = r ? k.proactiveRefresh.user : {};
 
         this.props.hydrateUser((window[this.props.windowKey] = read.user)); //bottle
-        //console.log(window[this.props.windowKey]);
+        //console.log(windowAuth);
         //storedAuth.multiFactor = JSON.parse(storedAuth.multiFactor);
         this.props.verbose &&
           console.log(
@@ -135,23 +135,24 @@ class PromptAuth extends React.Component {
       .catch((err) => console.log(err));
   };
   render() {
-    var { verbose, hydrateUser, meAuth } = this.props; //strict promise //return await new Promise((resolve) =>
+    var { verbose, hydrateUser } = this.props, //strict promise //return await new Promise((resolve) =>
+      windowAuth = window[this.props.windowKey];
     const removeanon = () =>
-      meAuth &&
-      meAuth !== undefined &&
-      meAuth.constructor === Object &&
-      meAuth.isAnonymous && //meAuth.delete() //firebase 8
+      windowAuth &&
+      windowAuth !== undefined &&
+      windowAuth.constructor === Object &&
+      windowAuth.isAnonymous && //windowAuth.delete() //firebase 8
       getAuth()
-        .deleteUser(meAuth.uid)
+        .deleteUser(windowAuth.uid)
         .then(() => {
           window.alert(
             "REACT-LOCAL-FIREBASE: successfully removed anonymous account"
           );
           verbose &&
             console.log(
-              "REACT-LOCAL-FIREBASE: " + meAuth.uid + " is logged in"
+              "REACT-LOCAL-FIREBASE: " + windowAuth.uid + " is logged in"
             );
-          this.props.onFinish(); // resolve(meAuth.isAnonymous); if (res)
+          this.props.onFinish(); // resolve(windowAuth.isAnonymous); if (res)
         })
         .catch(standardCatch); //res.isAnonymous
     const store = (obj) => {
@@ -160,31 +161,37 @@ class PromptAuth extends React.Component {
         _id: obj.uid
       })
         .then(async (r) => await JSON.parse(r))
-        .then((res) => Object.keys(obj).length > 1 && hydrateUser(res)) //reload,"isStored"
+        .then(
+          (res) =>
+            Object.keys(obj).length > 0 &&
+            hydrateUser((window[this.props.windowKey] = res))
+        ) //reload,"isStored"
         .catch(standardCatch); //when anonymous, too
     };
     const hoistAuth = (User, force) => {
       //return {  local: (reload, auts) => {
       const err = !User || Object.keys(User).length === 0;
-      err && hydrateUser({}); //const a = /* err ? { _id: "none" } : */ User; /*meAuth ? meAuth :*/ //auts; //mea
+      err && hydrateUser({}); //const a = /* err ? { _id: "none" } : */ User; /*windowAuth ? windowAuth :*/ //auts; //mea
       var permission = null;
       console.log("User: ", User);
       if (User) {
         if (!User.isAnonymous && !force)
           permission = window.confirm(
-            (!this.props.meAuth ? "is this a private device? if so, " : "") +
+            (!windowAuth ? "is this a private device? if so, " : "") +
               "can we store your auth data?" +
               `(${User.displayName},${User.phoneNumber},${User.email})` //mea
           );
         if (!permission) {
-          if (meAuth) {
-            const { displayName, phoneNumber, email } = meAuth;
+          if (windowAuth) {
+            const { displayName, phoneNumber, email } = window[
+              this.props.windowKey
+            ];
             window.confirm(
               "should we clear the following from your device? " +
-                `(${displayName},${phoneNumber},${email})` //mea
-            ) && store({ _id: meAuth.uid });
+                `(${displayName},${phoneNumber},${email},${windowAuth.uid})` //mea
+            ) && store({ _id: windowAuth.uid });
           }
-          hydrateUser(User); //var meAuthstripped = stringAuthObj(mea);console.log(meAuthstripped);
+          hydrateUser((window[this.props.windowKey] = User)); //var meAuthstripped = stringAuthObj(mea);console.log(meAuthstripped);
           verbose &&
             console.log("REACT-LOCAL-FIREBASE(ephemeral): " + User.uid); //+ meAuthstripped.isAnonymous ? "" : "?"
         } else {
@@ -213,7 +220,7 @@ class PromptAuth extends React.Component {
               if (!aut) {
                 var answer = window.confirm("login?");
                 if (answer) return this.props.onPromptToLogin();
-                await signInAnonymously(getAuth());
+                //await signInAnonymously(getAuth()).catch(standardCatch);
                 return (
                   verbose &&
                   console.log(
@@ -229,35 +236,46 @@ class PromptAuth extends React.Component {
         }
       );
     //console.log(this.state.authe);
+    const reload = async (isFunc) =>
+      isFunc
+        ? await windowAuth.reload().then(async () => {
+            windowAuth = await getAuth().currentUser;
+            if (!windowAuth)
+              return hydrateUser((window[this.props.windowKey] = {}));
+            store(windowAuth);
+          })
+        : hydrateUser((window[this.props.windowKey] = {})); // console.log("windowAuth", windowAuth); //signOut reset or remove recall
     return (
       <div style={this.props.style}>
         <div
           ref={this.props.pa} //promptAuth
           onClick={() => {
-            console.log("REACT-LOCAL-FIREBASE(questionaire): ", meAuth);
+            console.log("REACT-LOCAL-FIREBASE(questionaire): ", windowAuth);
             if (!this.state.authStateListening) return init();
-            hoistAuth(meAuth);
+            hoistAuth(windowAuth);
           }} //,null,true); //this.props.clearStore();
         />
         <div
           ref={this.props.gui} //getUserInfo
           onClick={async () => {
             this.props.onStart();
-            if (!this.state.authStateListening) return init();
-            //if (!meAuth) return init(); // (meAuth.constructor === Object && Object.keys(meAuth).length < 1)
-
-            if (meAuth.isAnonymous) {
-              console.log(meAuth.uid + " is anonymous"); //hoistAuth(s, false, true);
+            if (!this.state.authStateListening || !windowAuth) {
+              return init();
+            } else reload(windowAuth.reload instanceof Function);
+            //if (!windowAuth) return init(); // (windowAuth.constructor === Object && Object.keys(windowAuth).length < 1)
+            //https://www.red-gate.com/simple-talk/development/working-with-firebase-version-9-modular-sdk-and-react-typescript/
+            if (windowAuth.isAnonymous) {
+              console.log(windowAuth.uid + " is anonymous"); //hoistAuth(s, false, true);
               return this.props.onPromptToLogin();
             } //return await new Promise((resolve) => resolve("login?"));
-            //if (s !== undefined) !s.multiFactor && this.state.adb.deleteKeys(); meAuth.multiFactor = JSON.parse(s.multiFactor);
-            // this.props.hydrateUser(meAuth);
+            //if (s !== undefined) !s.multiFactor && this.state.adb.deleteKeys(); windowAuth.multiFactor = JSON.parse(s.multiFactor);
+            // this.props.hydrateUser(windowAuth);
             verbose &&
               console.log(
                 `REACT-LOCAL-FIREBASE: ${
-                  meAuth.uid + " is stored, saving on costs here"
+                  windowAuth.uid + " is stored, saving on costs here"
                 }`
-              ); //!meAuth.multiFactor ? meAuth.uid + " is substandard; !meAuth1.multiFactor, deleting these from pouchdb.."
+              ); //!windowAuth.multiFactor ? windowAuth.uid + " is substandard; !meAuth1.multiFactor, deleting these from pouchdb.."
             removeanon(); //: //strAu.uid + ": JSON.parse-ing 'meAuth1.multiFactor' object..":
           }}
         />
@@ -265,18 +283,17 @@ class PromptAuth extends React.Component {
           ref={this.props.ra} //resetAuth
           onClick={() => {
             //this.props.onStart();
-            if (!meAuth.uid)
+            if (!windowAuth || !windowAuth.uid)
               return console.log(
-                "(react-local-firebase): no loaded meAuth",
-                meAuth
+                "(react-local-firebase): no loaded windowAuth",
+                windowAuth
               ); //hoistAuth({}, true, true); //payload, reload, all-but-denied permission
-            this.state.adb["remove"](meAuth.uid) //_id
-              .then(async (res) => {
-                await meAuth.reload(); //signOut reset or remove recall
-                window[this.props.windowKey] = await getAuth().currentUser();
-                if (!window[this.props.windowKey]) return hydrateUser({});
-                store(window[this.props.windowKey]);
-              }) //, true, "isStored"))
+            this.state.adb["remove"](windowAuth.uid) //_id
+              .then(
+                async (res) => hydrateUser((window[this.props.windowKey] = {}))
+
+                // reload(windowAuth.reload instanceof Function)
+              ) //, true, "isStored"))
               .catch(standardCatch); //when anonymous, too  //if (res) this.props.onFinish(); //res.isAnonymous
           }}
         />
